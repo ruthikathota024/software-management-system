@@ -1,0 +1,65 @@
+CREATE TABLE Client (
+  client_id  INT PRIMARY KEY,
+  name       VARCHAR(100) NOT NULL,
+  email      VARCHAR(100) NOT NULL UNIQUE,
+  phone      VARCHAR(15),
+  address    VARCHAR(200)
+);
+
+CREATE TABLE Project (
+  project_id INT PRIMARY KEY,
+  title      VARCHAR(100) NOT NULL,
+  client_id  INT NOT NULL,
+  start_date DATE,
+  end_date   DATE,
+  status     VARCHAR(20) DEFAULT 'Ongoing'
+             CHECK (status IN ('Ongoing','Completed','On Hold')),
+  FOREIGN KEY (client_id) REFERENCES Client(client_id)
+);
+
+CREATE TABLE Team (
+  team_id    INT PRIMARY KEY,
+  team_name  VARCHAR(100) NOT NULL,
+  project_id INT NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES Project(project_id)
+);
+
+CREATE TABLE Developer (
+  developer_id INT PRIMARY KEY,
+  name         VARCHAR(100) NOT NULL,
+  email        VARCHAR(100) NOT NULL UNIQUE,
+  role         VARCHAR(50),
+  team_id      INT NOT NULL,
+  FOREIGN KEY (team_id) REFERENCES Team(team_id)
+);
+
+CREATE TABLE Module (
+  module_id   INT PRIMARY KEY,
+  module_name VARCHAR(100) NOT NULL,
+  description VARCHAR(200),
+  project_id  INT NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES Project(project_id)
+);
+
+CREATE TABLE Task (
+  task_id      INT PRIMARY KEY,
+  title        VARCHAR(100) NOT NULL,
+  deadline     DATE,
+  status       VARCHAR(20) DEFAULT 'Pending'
+               CHECK (status IN ('Pending','In Progress','Completed')),
+  module_id    INT NOT NULL,
+  developer_id INT NOT NULL,
+  FOREIGN KEY (module_id) REFERENCES Module(module_id),
+  FOREIGN KEY (developer_id) REFERENCES Developer(developer_id)
+);
+
+CREATE TABLE Bug (
+  bug_id        INT PRIMARY KEY,
+  description   VARCHAR(200) NOT NULL,
+  severity      VARCHAR(10) CHECK (severity IN ('Low','Medium','High')),
+  status        VARCHAR(20) DEFAULT 'Open'
+                CHECK (status IN ('Open','Resolved')),
+  reported_date DATE,
+  task_id       INT NOT NULL,
+  FOREIGN KEY (task_id) REFERENCES Task(task_id)
+);
